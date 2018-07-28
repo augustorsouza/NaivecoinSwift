@@ -7,29 +7,63 @@ final class PeerManager {
     private init() { }
 
     private(set) var peers: [Peer] = []
-    private(set) var webSockets: [Future<Void>] = []
+
+    private var websocketClients: [WebSocket] = []
+
+    func setupWebsocketServer() -> NIOWebSocketServer {
+        // Create a new NIO websocket server
+        let wss = NIOWebSocketServer.default()
+
+        // Add WebSocket upgrade support to GET /connect
+        wss.get("connect") { ws, req in
+            print("Added peer!")
+            PeerManager.shared.websocketClients.append(ws)
+        }
+
+        return wss
+    }
 
     func append(peer: Peer) {
         do {
-            let done = try application.client().webSocket(peer.address).flatMap { ws -> Future<Void> in
-                // setup an on text callback that will print the echo
-                ws.onText { ws, text in
-                    print("rec: \(text)")
-                    // close the websocket connection after we recv the echo
-                    ws.close()
-                }
-
-                // when the websocket first connects, send message
-                ws.send("hello, world!")
-
-                // return a future that will complete when the websocket closes
-                return ws.onClose
-            }
-            
+            try setupP2PConnection(to: peer)
             peers.append(peer)
-            webSockets.append(done)
         } catch {
             fatalError("Could not connet to \(peer)")
+        }
+    }
+
+    func broadcast(_ block: Block) {
+        websocketClients.forEach { (ws) in
+            do {
+                let blockData = try JSONEncoder().encode(block)
+                let blockString = String(data: blockData, encoding: .utf8) ?? ""
+                ws.send(text: blockString)
+            } catch {
+                print("Failed to sendo block data for block \(block)")
+            }
+        }
+    }
+
+    private func setupP2PConnection(to peer: Peer) throws {
+        let connectEndpoint = peer.address + "connect"
+
+        _ = try application.client().webSocket(connectEndpoint).flatMap { ws -> Future<Void> in
+
+            ws.onText({ (ws, text) in
+                guard let blockData = text.data(using: .utf8), let block = try? JSONDecoder().decode(Block.self, from: blockData) else {
+                    print(text)
+                    return
+                }
+
+                var blocks = Blockchain.shared.blocks
+                blocks.append(block)
+
+                Blockchain.shared.replaceChain(newBlocks: blocks)
+            })
+
+            ws.send("Initiating a connection from \(application.environment.arguments.last ?? "")")
+
+            return ws.onClose
         }
     }
 }

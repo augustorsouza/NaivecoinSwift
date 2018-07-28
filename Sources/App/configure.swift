@@ -30,19 +30,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(migrations)
 
     // Websockets
-    
-    // Create a new NIO websocket server
-    let wss = NIOWebSocketServer.default()
-
-    // Add WebSocket upgrade support to GET /echo
-    wss.get("echo") { ws, req in
-        // Add a new on text callback
-        ws.onText { ws, text in
-            // Simply echo any received text
-            ws.send("TESTE AUGUSTO" + text)
-        }
-    }
-
-    // Register our server
+    let wss = PeerManager.shared.setupWebsocketServer()
     services.register(wss, as: WebSocketServer.self)
 }
