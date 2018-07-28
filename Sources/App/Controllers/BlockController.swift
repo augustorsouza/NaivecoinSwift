@@ -18,7 +18,9 @@ final class BlockController {
             guard let data = json["data"] else {
                 throw Abort(.badRequest)
             }
-            return try Blockchain.shared.generateNextBlock(data: data)
+            let block = try Blockchain.shared.generateNextBlock(data: data)
+            PeerManager.shared.broadcast(block)
+            return block
         })
 
     }
