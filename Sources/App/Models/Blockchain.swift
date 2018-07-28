@@ -80,13 +80,13 @@ protocol BlockValidator {
 
 struct IndexBlockValidator: BlockValidator {
     func isValid(block: Block, previousBlock: Block) -> Bool {
-        return block.index == previousBlock.index - 1
+        return block.index - 1 == previousBlock.index
     }
 }
 
 struct PreviousHashBlockValidator: BlockValidator {
     func isValid(block: Block, previousBlock: Block) -> Bool {
-        return block.hash == previousBlock.previousHash
+        return block.previousHash == previousBlock.hash
     }
 }
 
