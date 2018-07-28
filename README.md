@@ -1,26 +1,26 @@
 # Naivecoin: chapter 1
-The branch for Naivecoin, chapter1
+Swift and vapor implementation of the [Naivecoin](https://lhartikk.github.io)
 
 ```
-npm install
-npm start
+vapor build
+vapor run
 ```
 
 ##### Get blockchain
 ```
-curl http://localhost:3001/blocks
+curl http://localhost:8080/blocks
 ```
 
 ##### Create block
 ```
-curl -H "Content-type:application/json" --data '{"data" : "Some data to the first block"}' http://localhost:3001/mineBlock
+curl -H "Content-type:application/json" --data '{"data" : "Some data to the first block"}' http://localhost:8080/mineBlock
 ``` 
 
 ##### Add peer
 ```
-curl -H "Content-type:application/json" --data '{"peer" : "ws://localhost:6001"}' http://localhost:3001/addPeer
+curl -H "Content-type:application/json" --data '{"peer" : "ws://localhost:6001"}' http://localhost:8080/addPeer
 ```
 #### Query connected peers
 ```
-curl http://localhost:3001/peers
+curl http://localhost:8080/peers
 ```
