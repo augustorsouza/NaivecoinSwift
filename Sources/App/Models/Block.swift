@@ -2,7 +2,7 @@ import Vapor
 import Crypto
 
 struct Block: Codable, Equatable {
-    static let genesis: Block = Block(index: 0, hash: "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7", previousHash: "", data: "Genesis Block", timestamp: Date())
+    static let genesis: Block = Block(index: 0, hash: "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7", previousHash: "", data: "Genesis Block", timestamp: Date(timeIntervalSince1970: 0))
 
     let index: UInt
     let hash: String
